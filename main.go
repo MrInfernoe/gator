@@ -6,10 +6,8 @@ import (
 )
 
 func main() {
-	// Read config
-	// set user to "infernoe" and save to file
-	// reread config and print
-	fmt.Println("hello, World!")
-	FromConfig := config.Read()
-	fmt.Println(FromConfig)
+	cfg := config.ReadConfig()
+	cfg.SetUser("MrInfernoe")
+	cfg = config.ReadConfig()
+	fmt.Printf("config struct: %v\n", cfg)
 }
