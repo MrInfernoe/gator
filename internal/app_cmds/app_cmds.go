@@ -4,6 +4,7 @@ import (
 	"strings"
 	"os"
 	"context"
+	"bufio"
 	"github.com/google/uuid"
 	"time"
 	"fmt"
@@ -56,6 +57,7 @@ func (c *Commands) Register(name string, f func(*State, Command) error) {
 	c.Registry[name] = f
 }
 
+// checks for username in database then sets to current in config
 func HandlerLogin(s *State, cmd Command) error {
 	// expects 1 command argument: username
 	if len(cmd.Args) == 0 {
@@ -77,6 +79,7 @@ func HandlerLogin(s *State, cmd Command) error {
 	return nil
 }
 
+// adds username to database
 func HandlerRegister(s *State, cmd Command) error {
 	if len(cmd.Args) == 0 {
 		return fmt.Errorf("error: no name given")
@@ -111,3 +114,22 @@ func HandlerRegister(s *State, cmd Command) error {
 	return nil
 }
 
+// deletes all data from users database
+func HandlerReset(s *State, cmd Command) error {
+	
+	fmt.Println("Delete all records from \"users\" database? Y/n ")
+	
+	scanner := bufio.NewScanner(os.Stdin)
+	scanner.Scan()
+	if scanner.Text() != "Y" {
+		fmt.Println("Delete cancelled")
+		return nil
+	}
+	ctx := context.Background()
+	err := s.DbQPtr.ResetUsers(ctx)
+	if err != nil {
+		return err
+	}
+	fmt.Println("database \"users\" has been cleared ")
+	return nil
+}

@@ -20,6 +20,8 @@ func main() {
 	// fmt.Println(commands)
 	commands.Register("register", app_cmds.HandlerRegister)
 
+	commands.Register("reset", app_cmds.HandlerReset)
+
 	inputArgs := os.Args
 	if len(inputArgs) < 2 {
 		fmt.Println("error: too few arguments")
