@@ -47,7 +47,7 @@ func (c Config) SetUser(username string) {
 	c.Current_user_name = username
 	err := writeConfig(c)
 	if err != nil {
-		fmt.Errorf("error writing config to file: %v", err)
+		fmt.Printf("error writing config to file: %v\n", err)
 	}
 }
 
