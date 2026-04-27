@@ -19,13 +19,12 @@ func main() {
 	commands := app_cmds.NewCommands()
 	// fmt.Println(commands)
 	commands.Register("login", app_cmds.HandlerLogin)
-	// fmt.Println(commands)
 	commands.Register("register", app_cmds.HandlerRegister)
-
 	commands.Register("reset", app_cmds.HandlerReset)
-
 	commands.Register("users", app_cmds.HandlerGetUsers)
 	commands.Register("agg", app_cmds.HandlerAgg)
+	commands.Register("addfeed", app_cmds.HandlerAddFeed)
+	// fmt.Println(commands)
 
 	inputArgs := os.Args
 	if len(inputArgs) < 2 {

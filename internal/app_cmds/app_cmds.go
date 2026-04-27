@@ -45,8 +45,8 @@ func NewCommands() Commands {
 }
 
 // runs given command with state if exists
-func (c *Commands) Run(s *State, cmd Command) error { // state???
-	err := c.Registry[cmd.Name](s, cmd)								// here
+func (c *Commands) Run(s *State, cmd Command) error {
+	err := c.Registry[cmd.Name](s, cmd)
 	if err != nil {
 		return err
 	}
@@ -87,7 +87,7 @@ func HandlerRegister(s *State, cmd Command) error {
 	}
 
 	name := strings.Join(cmd.Args, " ")
-	user, err := s.DbQPtr.GetUser(context.Background(), name)		// here
+	user, err := s.DbQPtr.GetUser(context.Background(), name)
 	if err != nil && fmt.Sprintf("%v", err) != fmt.Sprintf("sql: no rows in result set") {
 		return fmt.Errorf(fmt.Sprintf("error from get: %v", err))
 	}
@@ -131,7 +131,7 @@ func HandlerReset(s *State, cmd Command) error {
 	if err != nil {
 		return err
 	}
-	fmt.Println("database \"users\" has been cleared ")
+	fmt.Println("database has been cleared")
 	return nil
 }
 
@@ -173,5 +173,36 @@ func HandlerAgg(s *State, cmd Command) error {
 
 	fmt.Println(rssfeed)
 
+	return nil
+}
+
+func HandlerAddFeed(s *State, cmd Command) error {
+	// get current user and connect feed to user
+	if len(cmd.Args) < 2 {
+		return fmt.Errorf("name AND url required")
+	}
+
+	current_user_name := s.ConfigPtr.Current_user_name
+	ctx := context.Background()
+	current_user, err := s.DbQPtr.GetUser(ctx, current_user_name)
+	if fmt.Sprintf("%v", err) == fmt.Sprintf("sql: no rows in result set") {
+		return fmt.Errorf("no current user found")
+	} else if err != nil {
+		return err
+	}
+	
+	id := uuid.New()
+	created := time.Now()
+	updated := time.Now()
+	name := cmd.Args[0]
+	url := cmd.Args[1]
+	user_id := current_user.ID
+	params := database.CreateFeedParams{id, created, updated, name, url, user_id}
+	
+	createdFeed, err := s.DbQPtr.CreateFeed(ctx, params)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("added to feeds:\n%v\n", createdFeed)
 	return nil
 }
