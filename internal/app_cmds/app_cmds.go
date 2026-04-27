@@ -4,7 +4,7 @@ import (
 	"strings"
 	"os"
 	"context"
-	"bufio"
+	_ "bufio"
 	"github.com/google/uuid"
 	"time"
 	"fmt"
@@ -117,19 +117,40 @@ func HandlerRegister(s *State, cmd Command) error {
 // deletes all data from users database
 func HandlerReset(s *State, cmd Command) error {
 	
-	fmt.Println("Delete all records from \"users\" database? Y/n ")
+	// fmt.Println("Delete all records from \"users\" database? Y/n ")
 	
-	scanner := bufio.NewScanner(os.Stdin)
-	scanner.Scan()
-	if scanner.Text() != "Y" {
-		fmt.Println("Delete cancelled")
-		return nil
-	}
+	// scanner := bufio.NewScanner(os.Stdin)
+	// scanner.Scan()
+	// if scanner.Text() != "Y" {
+	// 	fmt.Println("Delete cancelled")
+	// 	return nil
+	// }
 	ctx := context.Background()
 	err := s.DbQPtr.ResetUsers(ctx)
 	if err != nil {
 		return err
 	}
 	fmt.Println("database \"users\" has been cleared ")
+	return nil
+}
+
+func HandlerGetUsers(s *State, cmd Command) error {
+	var users []database.User
+	ctx := context.Background()
+	users, err := s.DbQPtr.GetUsers(ctx)
+	if err != nil {
+		return err
+	}
+	if len(users) == 0 {
+		fmt.Println("no users found")
+	}
+	currentUser := s.ConfigPtr.Current_user_name
+	for _, user := range users {
+		fmt.Printf(user.Name)
+		if user.Name == currentUser {
+			fmt.Printf(" (current)")
+		}
+		fmt.Printf("\n")
+	}
 	return nil
 }

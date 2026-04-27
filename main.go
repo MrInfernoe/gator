@@ -22,6 +22,8 @@ func main() {
 
 	commands.Register("reset", app_cmds.HandlerReset)
 
+	commands.Register("users", app_cmds.HandlerGetUsers)
+
 	inputArgs := os.Args
 	if len(inputArgs) < 2 {
 		fmt.Println("error: too few arguments")
