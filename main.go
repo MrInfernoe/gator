@@ -24,6 +24,7 @@ func main() {
 	commands.Register("users", app_cmds.HandlerGetUsers)
 	commands.Register("agg", app_cmds.HandlerAgg)
 	commands.Register("addfeed", app_cmds.HandlerAddFeed)
+	commands.Register("feeds", app_cmds.HandlerGetFeeds)
 	// fmt.Println(commands)
 
 	inputArgs := os.Args

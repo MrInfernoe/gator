@@ -206,3 +206,20 @@ func HandlerAddFeed(s *State, cmd Command) error {
 	fmt.Printf("added to feeds:\n%v\n", createdFeed)
 	return nil
 }
+
+func HandlerGetFeeds(s *State, cmd Command) error {
+	if len(cmd.Args) > 0 {
+		return fmt.Errorf("too many arguments")
+	}
+	// print all db feeds: name, url, user
+	ctx := context.Background()
+	feedsList, err := s.DbQPtr.GetFeeds(ctx)
+	if err != nil {
+		return err
+	}
+	for _, feedInfo := range feedsList {
+		fmt.Printf("%v %v %v\n", feedInfo.FeedName, feedInfo.Url, feedInfo.UserName.String)
+	}
+
+	return nil
+}
