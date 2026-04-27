@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"os"
 	"database/sql"
+	// "context"
 	// "gator/internal/config"
 	"gator/internal/app_cmds"
 	"gator/internal/database"
+	// "gator/internal/feed"
 )
 
 func main() {
@@ -23,6 +25,7 @@ func main() {
 	commands.Register("reset", app_cmds.HandlerReset)
 
 	commands.Register("users", app_cmds.HandlerGetUsers)
+	commands.Register("agg", app_cmds.HandlerAgg)
 
 	inputArgs := os.Args
 	if len(inputArgs) < 2 {
@@ -45,4 +48,11 @@ func main() {
 		os.Exit(1)
 	}
 	// fmt.Println(configState.ConfigPtr.Db_url)
+
+	// fmt.Println("feed test")
+	// feed, err := feed.FetchFeed(context.Background(), "https://www.wagslane.dev/index.xml")
+	// if err != nil {
+	// 	fmt.Printf("error: %v\n", err)
+	// }
+	// fmt.Printf("feed:\n%v\n", feed)
 }

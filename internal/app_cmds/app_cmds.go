@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"gator/internal/config"
 	"gator/internal/database"
+	"gator/internal/feed"
 )
 
 // holds config state
@@ -152,5 +153,25 @@ func HandlerGetUsers(s *State, cmd Command) error {
 		}
 		fmt.Printf("\n")
 	}
+	return nil
+}
+
+func HandlerAgg(s *State, cmd Command) error {
+	// if len(cmd.Args) < 1 {
+	// 	return fmt.Errorf("URL required")
+	// }
+	// if len(cmd.Args) > 1 {
+	// 	return fmt.Errorf("too many arguments")
+	// }
+	ctx := context.Background()
+	// feedURL := cmd.Args[0]
+	feedURL := "https://www.wagslane.dev/index.xml"
+	rssfeed, err := feed.FetchFeed(ctx, feedURL)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(rssfeed)
+
 	return nil
 }
