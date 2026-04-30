@@ -3,14 +3,14 @@ package app_cmds
 import (
 	// "strings"
 	// "os"
-	// "context"
+	"context"
 	_ "bufio"
 	// "github.com/google/uuid"
-	// "time"
-	// "fmt"
+	"time"
+	"fmt"
 	"gator/internal/config"
 	"gator/internal/database"
-	// "gator/internal/feed"
+	"gator/internal/feed"
 )
 
 // holds config state
@@ -58,3 +58,26 @@ func (c *Commands) Register(name string, f func(*State, Command) error) {
 	c.Registry[name] = f
 }
 
+func ScrapeFeeds(s *State) error {
+	ctx := context.Background()
+	nextFeed, err := s.DbQPtr.GetNextFeedToFetch(ctx)
+	if err != nil {
+		return err
+	}
+
+	fetchedParams := database.MarkFeedFetchedParams{nextFeed.Url, time.Now()}
+	err = s.DbQPtr.MarkFeedFetched(ctx, fetchedParams)
+	if err != nil {
+		return err
+	}
+
+	fetchedRSSFeed, err := feed.FetchFeed(ctx, nextFeed.Url)
+	if err != nil {
+		return err
+	}
+	for _, item := range fetchedRSSFeed.Channel.Items {
+		fmt.Printf("%v\n", item.Title)
+	}
+
+	return nil
+}

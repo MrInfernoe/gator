@@ -8,7 +8,7 @@ import (
 	"github.com/google/uuid"
 	"time"
 	"gator/internal/database"
-	"gator/internal/feed"
+	// "gator/internal/feed"
 )
 
 // checks for username in database then sets to current in config
@@ -110,22 +110,30 @@ func HandlerGetUsers(s *State, cmd Command) error {
 }
 
 func HandlerAgg(s *State, cmd Command) error {
-	// if len(cmd.Args) < 1 {
-	// 	return fmt.Errorf("URL required")
-	// }
-	// if len(cmd.Args) > 1 {
-	// 	return fmt.Errorf("too many arguments")
-	// }
-	ctx := context.Background()
-	// feedURL := cmd.Args[0]
-	feedURL := "https://www.wagslane.dev/index.xml"
-	rssfeed, err := feed.FetchFeed(ctx, feedURL)
+	arglen := len(cmd.Args)
+	if arglen < 1 {
+		return fmt.Errorf("missing duration")
+	}
+	if arglen > 1 {
+		return fmt.Errorf("too many arguments")
+	}
+	
+	time_between_reqs := cmd.Args[0]
+	waitDuration, err := time.ParseDuration(time_between_reqs)
 	if err != nil {
 		return err
 	}
+	if waitDuration < 10*time.Second {
+		return fmt.Errorf("duration too small")
+	}
+	
+	fmt.Printf("Collecting feeds every %v\n", time_between_reqs)
 
-	fmt.Println(rssfeed)
-
+	ticker := time.NewTicker(waitDuration)
+	for ; ; <-ticker.C {
+		ScrapeFeeds(s)
+	}
+	
 	return nil
 }
 
