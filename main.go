@@ -23,10 +23,10 @@ func main() {
 	commands.Register("reset", app_cmds.HandlerReset)
 	commands.Register("users", app_cmds.HandlerGetUsers)
 	commands.Register("agg", app_cmds.HandlerAgg)
-	commands.Register("addfeed", app_cmds.HandlerAddFeed)
+	commands.Register("addfeed", app_cmds.MiddlewareLoggedIn(app_cmds.HandlerAddFeed))
 	commands.Register("feeds", app_cmds.HandlerGetFeeds)
-	commands.Register("follow", app_cmds.HandlerFollow)
-	commands.Register("following", app_cmds.HandlerFollowing)
+	commands.Register("follow", app_cmds.MiddlewareLoggedIn(app_cmds.HandlerFollow))
+	commands.Register("following", app_cmds.MiddlewareLoggedIn(app_cmds.HandlerFollowing))
 	// fmt.Println(commands)
 
 	inputArgs := os.Args

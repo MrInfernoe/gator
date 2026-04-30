@@ -129,36 +129,27 @@ func HandlerAgg(s *State, cmd Command) error {
 	return nil
 }
 
-func HandlerAddFeed(s *State, cmd Command) error {
+func HandlerAddFeed(s *State, cmd Command, user database.User) error {
 	// get current user and connect feed to user
 	if len(cmd.Args) < 2 {
-		return fmt.Errorf("name AND url required")
-	}
-
-	current_user_name := s.ConfigPtr.Current_user_name
-	ctx := context.Background()
-	current_user, err := s.DbQPtr.GetUser(ctx, current_user_name)
-	if fmt.Sprintf("%v", err) == fmt.Sprintf("sql: no rows in result set") {
-		return fmt.Errorf("no current user found")
-	} else if err != nil {
-		return err
+		return fmt.Errorf("feed name and url required")
 	}
 	
+	ctx := context.Background()
 	id := uuid.New()
 	created := time.Now()
 	updated := time.Now()
-	name := cmd.Args[0]
+	feed_name := cmd.Args[0]
 	url := cmd.Args[1]
-	user_id := current_user.ID
-	params := database.CreateFeedParams{id, created, updated, name, url, user_id}
-	
+	params := database.CreateFeedParams{id, created, updated, feed_name, url, user.ID}
+
 	createdFeed, err := s.DbQPtr.CreateFeed(ctx, params)
 	if err != nil {
 		return err
 	}
 	fmt.Printf("added to feeds:\n%v\n", createdFeed)
 	newCmd := Command{Name: "following", Args: []string{url}}
-	err = HandlerFollow(s, newCmd)
+	err = HandlerFollow(s, newCmd, user)
 	if err != nil {
 		return err
 	}
@@ -183,7 +174,7 @@ func HandlerGetFeeds(s *State, cmd Command) error {
 	return nil
 }
 
-func HandlerFollow(s *State, cmd Command) error {
+func HandlerFollow(s *State, cmd Command, user database.User) error {
 	if len(cmd.Args) < 1 {
 		return fmt.Errorf("not enough arguments")
 	} else if len(cmd.Args) > 1 {
@@ -196,18 +187,18 @@ func HandlerFollow(s *State, cmd Command) error {
 	if err != nil {
 		return err
 	}
-	user, err := s.DbQPtr.GetUser(ctx, s.ConfigPtr.Current_user_name)
-	if err != nil {
-		return err
-	}
+	// user, err := s.DbQPtr.GetUser(ctx, s.ConfigPtr.Current_user_name)
+	// if err != nil {
+	// 	return err
+	// }
 
 
 	id := uuid.New()
 	created := time.Now()
 	updated := time.Now()
-	user_id := user.ID
+	// user_id := user.ID
 	feed_id := feed.ID
-	params := database.CreateFeedFollowParams{id, created, updated, user_id, feed_id}
+	params := database.CreateFeedFollowParams{id, created, updated, user.ID, feed_id}
 
 
 	// s is address of state, holds address of database.Queries create user acts on address of Queries
@@ -219,21 +210,21 @@ func HandlerFollow(s *State, cmd Command) error {
 	return nil
 }
 
-func HandlerFollowing(s *State, cmd Command) error {
+func HandlerFollowing(s *State, cmd Command, user database.User) error {
 	if len(cmd.Args) > 0 {
 		return fmt.Errorf("too many arguments")
 	}
-	user_name := s.ConfigPtr.Current_user_name
+	// user_name := s.ConfigPtr.Current_user_name
 	ctx := context.Background()
-	followedFeeds, err := s.DbQPtr.GetFeedFollowsForUser(ctx, user_name)
+	followedFeeds, err := s.DbQPtr.GetFeedFollowsForUser(ctx, user.Name)
 	if err != nil {
 		return err
 	}
 	if len(followedFeeds) == 0 {
-		fmt.Printf("user %v is not following any feeds\n", user_name)
+		fmt.Printf("user %v is not following any feeds\n", user.Name)
 		return nil
 	}
-	fmt.Printf("user %v is following these feeds:\n", user_name)
+	fmt.Printf("user %v is following these feeds:\n", user.Name)
 	for _, followedFeed := range followedFeeds {
 		fmt.Println(followedFeed.FeedName)
 	}
