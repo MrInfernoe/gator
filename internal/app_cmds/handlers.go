@@ -230,3 +230,28 @@ func HandlerFollowing(s *State, cmd Command, user database.User) error {
 	}
 	return nil
 }
+
+func HandlerUnfollow(s *State, cmd Command, user database.User) error {
+	if len(cmd.Args) < 1 {
+		return fmt.Errorf("missing url")
+	}
+	if len(cmd.Args) > 1 {
+		return fmt.Errorf("too many arguments")
+	}
+	feed_url := cmd.Args[0]
+	user_id := user.ID
+
+	ctx := context.Background()
+	feed, err := s.DbQPtr.GetFeed(ctx, feed_url)
+	if err != nil {
+		return err
+	}
+	feed_id := feed.ID
+
+	deleteParams := database.DeleteFeedFollowForUserFeedParams{user_id, feed_id}
+	err = s.DbQPtr.DeleteFeedFollowForUserFeed(ctx, deleteParams)
+	if err != nil {
+		return err
+	}
+	return nil
+}
