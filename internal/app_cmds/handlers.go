@@ -7,6 +7,7 @@ import (
 	"strings"
 	"github.com/google/uuid"
 	"time"
+	"strconv"
 	"gator/internal/database"
 	// "gator/internal/feed"
 )
@@ -131,7 +132,10 @@ func HandlerAgg(s *State, cmd Command) error {
 
 	ticker := time.NewTicker(waitDuration)
 	for ; ; <-ticker.C {
-		ScrapeFeeds(s)
+		err = ScrapeFeeds(s)
+		if err != nil {
+			return err
+		}
 	}
 	
 	return nil
@@ -155,7 +159,7 @@ func HandlerAddFeed(s *State, cmd Command, user database.User) error {
 	if err != nil {
 		return err
 	}
-	fmt.Printf("added to feeds:\n%v\n", createdFeed)
+	fmt.Printf("added to feeds: %v\n", createdFeed.Name)
 	newCmd := Command{Name: "following", Args: []string{url}}
 	err = HandlerFollow(s, newCmd, user)
 	if err != nil {
@@ -261,5 +265,38 @@ func HandlerUnfollow(s *State, cmd Command, user database.User) error {
 	if err != nil {
 		return err
 	}
+	return nil
+}
+
+func HandlerBrowse(s *State, cmd Command, user database.User) error {
+	lenArgs := len(cmd.Args)
+	const defaultLimit = 2
+	var limit int32
+	if lenArgs < 1 {
+		fmt.Printf("limit defaulted to %v\n", defaultLimit)
+		limit = defaultLimit
+	} else {
+		// fmt.Println(int32(cmd.Args[0]))
+		var err error
+		argLimit, err := strconv.ParseInt(cmd.Args[0], 10, 32)
+		if err != nil {
+			return err
+		}
+		limit = int32(argLimit)
+	}
+	if lenArgs > 1 {
+		fmt.Errorf("too many arguments")
+	}
+
+	ctx := context.Background()
+	postParams := database.GetPostsForUserParams{user.Name, limit}
+	users_posts, err := s.DbQPtr.GetPostsForUser(ctx, postParams)
+	if err != nil {
+		return err
+	}
+	for _, post := range users_posts {
+		fmt.Println(post.Title.String)
+	}
+
 	return nil
 }

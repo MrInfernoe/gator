@@ -28,6 +28,7 @@ func main() {
 	commands.Register("follow", app_cmds.MiddlewareLoggedIn(app_cmds.HandlerFollow))
 	commands.Register("following", app_cmds.MiddlewareLoggedIn(app_cmds.HandlerFollowing))
 	commands.Register("unfollow", app_cmds.MiddlewareLoggedIn(app_cmds.HandlerUnfollow))
+	commands.Register("browse", app_cmds.MiddlewareLoggedIn(app_cmds.HandlerBrowse))
 	// commands.Register("scrapeTest", app_cmds.ScrapeFeeds)
 	// fmt.Println(commands)
 

@@ -1,3 +1,4 @@
 connectToDatabase.sh
 startCleanDatabase.sh
 gooseMyDB.sh
+TestSetup.sh
